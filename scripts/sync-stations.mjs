@@ -303,8 +303,28 @@ async function main() {
   console.log(`Generating stations.ts from ${genres.length} genres, ${stations.length} stations...`);
 
   const content = generateStationsTs(genres, stations);
-  writeFileSync(STATIONS_FILE, content);
-  console.log('stations.ts written.');
+
+  // Skip the write entirely when only the "Last synced" timestamp would
+  // differ. This runs daily, and the sheet usually hasn't changed: without
+  // this, every run rewrote that one comment line, which defeated the
+  // workflow's own "commit only if changed" guard and pushed a commit every
+  // single day. Each of those triggered a full production deploy that
+  // retains its own function bundle, and ~1,200 of them filled Vercel's
+  // 10GB Function Storage with deploys of nothing but a changed timestamp.
+  const stripTimestamp = (s) => s.replace(/^\/\/ Last synced:.*$/m, '');
+  let unchanged = false;
+  try {
+    unchanged = stripTimestamp(readFileSync(STATIONS_FILE, 'utf8')) === stripTimestamp(content);
+  } catch {
+    // No existing file - fall through and write it.
+  }
+
+  if (unchanged) {
+    console.log('No station changes, leaving stations.ts untouched.');
+  } else {
+    writeFileSync(STATIONS_FILE, content);
+    console.log('stations.ts written.');
+  }
 
   if (!process.env.CI) {
     console.log('Building...');
