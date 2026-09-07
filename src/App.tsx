@@ -158,23 +158,25 @@ function App() {
     engine.playStation(pool[Math.floor(Math.random() * pool.length)]);
   };
 
-  // The SOOMFON's star key. Steps to the next favourite, alphabetically,
-  // wrapping - same ordering `handleFwd` already uses for its favs-mode
-  // filter, just always-on here regardless of genre. Deliberately NOT a
-  // toggle: the deck has no way to read this app's state, so anything
-  // stateful there ends up lying (the old favs/shuffle toggle drifted the
-  // moment a genre key was pressed, since playGenre clears both). A key that
-  // always does exactly one thing - "next favourite" - can't mislead.
+  // The SOOMFON's star key. Picks a RANDOM favourite (excluding the current
+  // one where possible) and turns favs mode on. Once favs mode is on,
+  // `handleFwd` above already filters to favourites and steps through them
+  // alphabetically - so star = shuffle into favs, forward = walk them in
+  // order from there, no separate code path needed for that second half.
+  // Deliberately NOT a toggle: the deck has no way to read this app's state,
+  // so anything stateful there ends up lying (the old favs/shuffle toggle
+  // drifted the moment a genre key was pressed, since playGenre clears
+  // both). A key that always does exactly one thing - "random favourite" -
+  // can't mislead.
   const handleFavsCycle = useCallback(() => {
-    const sortedFavs = [...stations]
-      .filter((s) => favourites.has(s.id))
-      .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
-    if (sortedFavs.length === 0) { setScreenMessage('Heart a station to build your FAVS'); return; }
+    const favsList = stations.filter((s) => favourites.has(s.id));
+    if (favsList.length === 0) { setScreenMessage('Heart a station to build your FAVS'); return; }
     engineRef.current.setActiveGenre(null);
     setShuffleMode(false);
     setFavsMode(true);
-    const idx = sortedFavs.findIndex((s) => s.id === engine.currentStation?.id);
-    engine.playStation(sortedFavs[(idx + 1) % sortedFavs.length]);
+    const candidates = favsList.filter((s) => s.id !== engine.currentStation?.id);
+    const pool = candidates.length > 0 ? candidates : favsList;
+    engine.playStation(pool[Math.floor(Math.random() * pool.length)]);
   }, [engine, favourites]);
 
   const handleShuffle = useCallback(() => {
