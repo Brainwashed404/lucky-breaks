@@ -202,34 +202,26 @@ function App() {
     setShuffleMode(next);
   }, []);
 
+  // Forward always steps to the next station in alphabetical order, never a
+  // random pick: "forward" should mean the one after this one, so NTS 1 goes to
+  // NTS 2. It therefore also drops out of shuffle, rather than continuing to
+  // jump around. Whatever genre and favs mode you're in is kept - the step just
+  // happens within that narrowed pool.
   const handleFwd = useCallback(() => {
-    if (favsMode) {
-      const sortedFavs = [...stations]
-        .filter((s) => favourites.has(s.id))
-        .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
-      if (sortedFavs.length === 0) return;
-      const pool = engine.activeGenre
-        ? sortedFavs.filter((s) => stationInGenre(s, engine.activeGenre!))
-        : sortedFavs;
-      if (pool.length === 0) { setScreenMessage('Fav a station in this genre'); return; }
-      if (shuffleMode) {
-        const candidates = pool.filter((s) => s.id !== engine.currentStation?.id);
-        engine.playStation((candidates.length > 0 ? candidates : pool)[Math.floor(Math.random() * (candidates.length > 0 ? candidates : pool).length)]);
-      } else {
-        const idx = pool.findIndex((s) => s.id === engine.currentStation?.id);
-        engine.playStation(pool[(idx + 1) % pool.length]);
-      }
+    if (shuffleMode) setShuffleMode(false);
+
+    let pool = sortedStations;
+    if (favsMode) pool = pool.filter((s) => favourites.has(s.id));
+    if (engine.activeGenre) pool = pool.filter((s) => stationInGenre(s, engine.activeGenre!));
+
+    if (pool.length === 0) {
+      if (favsMode) setScreenMessage('Fav a station in this genre');
       return;
     }
-    if (engine.activeGenre) {
-      engine.playNext();
-    } else if (shuffleMode) {
-      engine.shuffle();
-    } else {
-      const idx = sortedStations.findIndex((s) => s.id === engine.currentStation?.id);
-      const next = sortedStations[(idx + 1) % sortedStations.length];
-      if (next) engine.playStation(next);
-    }
+    // findIndex returning -1 (current station not in this pool) lands on the
+    // first entry, which is the sensible place to start from.
+    const idx = pool.findIndex((s) => s.id === engine.currentStation?.id);
+    engine.playStation(pool[(idx + 1) % pool.length]);
   }, [engine, shuffleMode, sortedStations, favsMode, favourites]);
 
   const handleRwd = useCallback(() => {
