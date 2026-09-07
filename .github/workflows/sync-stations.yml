@@ -41,7 +41,15 @@ jobs:
           git config user.email "bot@luckybreaks.xyz"
           git stash --include-untracked
           git pull --rebase origin main
-          git stash pop
+          # Only pop if something was actually stashed. Since sync-stations.mjs
+          # started skipping the write on a genuine no-op run (see its own
+          # comment), a clean run now leaves nothing to stash, and popping
+          # unconditionally failed with "No stash entries found" - a real
+          # exit-code-1 crash on 2026-09-07 that silently blocked every sync
+          # after it (including real content changes) until this was found.
+          if [ -n "$(git stash list)" ]; then
+            git stash pop
+          fi
           git add src/data/stations.ts
           if ! git diff --staged --quiet; then
             git commit -m "Sync stations from sheet"
