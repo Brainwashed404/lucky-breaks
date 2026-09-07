@@ -158,18 +158,24 @@ function App() {
     engine.playStation(pool[Math.floor(Math.random() * pool.length)]);
   };
 
-  // The SOOMFON's star key. Deliberately NOT a toggle: the deck has no way to
-  // read this app's state, so anything stateful there ends up lying (the old
-  // favs/shuffle toggle drifted the moment a genre key was pressed, since
-  // playGenre clears both). A key that always does exactly one thing can't
-  // mislead. Clears genre and favs, then jumps to a random station from the
-  // whole catalogue.
-  const handleShuffleAll = useCallback(() => {
+  // The SOOMFON's star key. Steps to the next favourite, alphabetically,
+  // wrapping - same ordering `handleFwd` already uses for its favs-mode
+  // filter, just always-on here regardless of genre. Deliberately NOT a
+  // toggle: the deck has no way to read this app's state, so anything
+  // stateful there ends up lying (the old favs/shuffle toggle drifted the
+  // moment a genre key was pressed, since playGenre clears both). A key that
+  // always does exactly one thing - "next favourite" - can't mislead.
+  const handleFavsCycle = useCallback(() => {
+    const sortedFavs = [...stations]
+      .filter((s) => favourites.has(s.id))
+      .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
+    if (sortedFavs.length === 0) { setScreenMessage('Heart a station to build your FAVS'); return; }
     engineRef.current.setActiveGenre(null);
-    setFavsMode(false);
-    setShuffleMode(true);
-    engineRef.current.shuffle();
-  }, []);
+    setShuffleMode(false);
+    setFavsMode(true);
+    const idx = sortedFavs.findIndex((s) => s.id === engine.currentStation?.id);
+    engine.playStation(sortedFavs[(idx + 1) % sortedFavs.length]);
+  }, [engine, favourites]);
 
   const handleShuffle = useCallback(() => {
     // If a genre pad is active, this button acts as ALL — clear genre only, keep FAVS intact
@@ -302,8 +308,8 @@ function App() {
 
   const handleFavsRef = useRef(handleFavsShuffle);
   const handleShuffleRef = useRef(handleShuffle);
-  const handleShuffleAllRef = useRef(handleShuffleAll);
-  handleShuffleAllRef.current = handleShuffleAll;
+  const handleFavsCycleRef = useRef(handleFavsCycle);
+  handleFavsCycleRef.current = handleFavsCycle;
   const toggleDarkRef = useRef(toggleDark);
   handleFavsRef.current = handleFavsShuffle;
   handleShuffleRef.current = handleShuffle;
@@ -469,7 +475,7 @@ function App() {
         // SOOMFON macro-deck shortcuts (see SOOMFON_GENRE_KEYS above).
         e.preventDefault();
         e.stopImmediatePropagation();
-        if (e.key === '1') handleShuffleAllRef.current();
+        if (e.key === '1') handleFavsCycleRef.current();
         else if (e.key === '`') handleShuffleRef.current();
         else playGenre(SOOMFON_GENRE_KEYS[e.key]!, favsRef.current);
       }
