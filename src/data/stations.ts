@@ -1,6 +1,6 @@
 // AUTO-GENERATED — edit via Google Sheet, not directly in this file
 // Sheet: https://docs.google.com/spreadsheets/d/1gfB4LfRESfMS25y8mXO80KIBnjAfued3OUuEDjRHvFA
-// Last synced: 2026-09-06T10:26:45.844Z
+// Last synced: 2026-09-07T15:32:39.170Z
 
 export type Genre =
   | 'AMBIENT + CHILL'
@@ -163,14 +163,6 @@ export const stations: Station[] = [
     description: 'Downtempo beats and chilled grooves',
     streamUrl: 'https://ice.somafm.com/groovesalad-128-mp3',
     websiteUrl: 'https://somafm.com/groovesalad',
-    genre: 'AMBIENT + CHILL',
-  },
-  {
-    id: 'somafm-mission-control',
-    name: 'SomaFM Mission Control',
-    description: 'Ambient music mixed with real-time NASA audio',
-    streamUrl: 'https://ice.somafm.com/missioncontrol-128-mp3',
-    websiteUrl: 'https://somafm.com/missioncontrol',
     genre: 'AMBIENT + CHILL',
   },
 
@@ -712,22 +704,6 @@ export const stations: Station[] = [
     genre: 'ECLECTIC',
   },
   {
-    id: 'somafm-fluid',
-    name: 'SomaFM Fluid',
-    description: 'Instrumental hiphop, future soul and liquid trap',
-    streamUrl: 'https://ice.somafm.com/fluid-128-mp3',
-    websiteUrl: 'https://somafm.com/fluid',
-    genre: 'ECLECTIC',
-  },
-  {
-    id: 'somafm-lush',
-    name: 'SomaFM Lush',
-    description: 'Sensuous and mellow female vocals',
-    streamUrl: 'https://ice.somafm.com/lush-128-mp3',
-    websiteUrl: 'https://somafm.com/lush',
-    genre: 'ECLECTIC',
-  },
-  {
     id: 'somafm-underground-80s',
     name: 'SomaFM Underground 80s',
     description: 'Early 80s UK Synthpop and New Wave',
@@ -966,14 +942,6 @@ export const stations: Station[] = [
     genre: 'JAZZ + EXOTICA',
   },
   {
-    id: 'somafm-secret-agent',
-    name: 'SomaFM Secret Agent',
-    description: 'Soundtrack for your stylish, mysterious life',
-    streamUrl: 'https://ice.somafm.com/secretagent-128-mp3',
-    websiteUrl: 'https://somafm.com/secretagent',
-    genre: 'JAZZ + EXOTICA',
-  },
-  {
     id: 'somafm-tiki-time',
     name: 'SomaFM Tiki Time',
     description: 'Vintage island rhythms to sip cocktails by',
@@ -1029,14 +997,6 @@ export const stations: Station[] = [
     description: 'All Beethoven All The Time',
     streamUrl: 'https://beethoven-one.stream.laut.fm/beethoven-one',
     websiteUrl: 'https://en.wikipedia.org/wiki/Ludwig_van_Beethoven',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
-    id: 'bill-evans-radio',
-    name: 'Bill Evans Radio',
-    description: 'All Bill Evans All the Time',
-    streamUrl: 'https://nl4.mystreaming.net/uber/jjrbillevans/icecast.audio',
-    websiteUrl: 'https://en.wikipedia.org/wiki/Bill_Evans',
     genre: 'LEGENDS + ERAS',
   },
   {
@@ -1144,14 +1104,6 @@ export const stations: Station[] = [
     genre: 'LEGENDS + ERAS',
   },
   {
-    id: 'charlie-parker-radio',
-    name: 'Charlie Parker Radio',
-    description: 'All Charlie Parker All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/charlieparker/icecast.audio',
-    websiteUrl: 'https://charlieparkermusic.com/',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
     id: 'chic-radio',
     name: 'Chic Radio',
     description: 'All Chic All The Time',
@@ -1221,14 +1173,6 @@ export const stations: Station[] = [
     description: 'All Daft Punk All The Time',
     streamUrl: 'https://streaming.exclusive.radio/er/daftpunk/icecast.audio',
     websiteUrl: 'https://daftpunk.com/',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
-    id: 'dave-brubeck-radio',
-    name: 'Dave Brubeck Radio',
-    description: 'All Dave Brubeck All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/davebrubeck/icecast.audio',
-    websiteUrl: 'https://davebrubeck.com/',
     genre: 'LEGENDS + ERAS',
   },
   {
@@ -1304,14 +1248,6 @@ export const stations: Station[] = [
     genre: 'LEGENDS + ERAS',
   },
   {
-    id: 'duke-ellington-radio',
-    name: 'Duke Ellington Radio',
-    description: 'All Duke Ellington All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/dukeellington/icecast.audio',
-    websiteUrl: 'https://www.dukeellington.com/',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
     id: 'eagles-radio',
     name: 'Eagles Radio',
     description: 'All Eagles All The Time',
@@ -1384,14 +1320,6 @@ export const stations: Station[] = [
     genre: 'LEGENDS + ERAS',
   },
   {
-    id: 'george-benson-radio',
-    name: 'George Benson Radio',
-    description: 'All George Benson All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/georgebenson/icecast.audio',
-    websiteUrl: 'https://www.georgebenson.com/',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
     id: 'george-michael-radio',
     name: 'George Michael Radio',
     description: 'All George Michael All The Time',
@@ -1437,14 +1365,6 @@ export const stations: Station[] = [
     description: 'All Hank Williams All The Time',
     streamUrl: 'https://streaming.exclusive.radio/er/hankwilliams/icecast.audio',
     websiteUrl: 'https://en.wikipedia.org/wiki/Hank_Williams',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
-    id: 'herbie-hancock-radio',
-    name: 'Herbie Hancock Radio',
-    description: 'All Herbie Hancock All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/herbiehancock/icecast.audio',
-    websiteUrl: 'https://www.herbiehancock.com/',
     genre: 'LEGENDS + ERAS',
   },
   {
@@ -1637,14 +1557,6 @@ export const stations: Station[] = [
     description: 'All Michael Jackson All The Time',
     streamUrl: 'https://streaming.exclusive.radio/er/michaeljackson/icecast.audio',
     websiteUrl: 'https://www.michaeljackson.com/',
-    genre: 'LEGENDS + ERAS',
-  },
-  {
-    id: 'miles-davis-radio',
-    name: 'Miles Davis Radio',
-    description: 'All Miles Davis All The Time',
-    streamUrl: 'https://streaming.exclusive.radio/er/milesdavis/icecast.audio',
-    websiteUrl: 'https://www.milesdavis.com/',
     genre: 'LEGENDS + ERAS',
   },
   {
@@ -2010,22 +1922,6 @@ export const stations: Station[] = [
     genre: 'ROCK + INDIE',
   },
   {
-    id: 'somafm-digitalis',
-    name: 'SomaFM Digitalis',
-    description: 'Digitally affected analog rock to calm the heart',
-    streamUrl: 'https://ice.somafm.com/digitalis-128-mp3',
-    websiteUrl: 'https://somafm.com/digitalis',
-    genre: 'ROCK + INDIE',
-  },
-  {
-    id: 'somafm-folk-forward',
-    name: 'SomaFM Folk Forward',
-    description: 'Indie Folk, Alt-folk and the occasional folk classics',
-    streamUrl: 'https://ice.somafm.com/folkfwd-128-mp3',
-    websiteUrl: 'https://somafm.com/folkfwd/',
-    genre: 'ROCK + INDIE',
-  },
-  {
     id: 'the-summit',
     name: 'The Summit',
     description: 'Musically Adventurous Indie and Alt Sounds from Akron',
@@ -2142,12 +2038,36 @@ export const stations: Station[] = [
 
   // ─── MULTI-GENRE ──────────────────────────────────────────────────────
   {
+    id: 'bill-evans-radio',
+    name: 'Bill Evans Radio',
+    description: 'All Bill Evans All the Time',
+    streamUrl: 'https://nl4.mystreaming.net/uber/jjrbillevans/icecast.audio',
+    websiteUrl: 'https://en.wikipedia.org/wiki/Bill_Evans',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
+  },
+  {
     id: 'boss-radio-66',
     name: 'Boss Radio 66',
     description: 'All \'60s all the time, with an obscure twist',
     streamUrl: 'https://stream.rcast.net/261426',
     websiteUrl: 'https://www.bossradio66.com/',
     genre: ['ROCK + INDIE', 'LEGENDS + ERAS'],
+  },
+  {
+    id: 'charlie-parker-radio',
+    name: 'Charlie Parker Radio',
+    description: 'All Charlie Parker All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/charlieparker/icecast.audio',
+    websiteUrl: 'https://charlieparkermusic.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
+  },
+  {
+    id: 'dave-brubeck-radio',
+    name: 'Dave Brubeck Radio',
+    description: 'All Dave Brubeck All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/davebrubeck/icecast.audio',
+    websiteUrl: 'https://davebrubeck.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
   },
   {
     id: 'dinamo-caffe',
@@ -2158,12 +2078,44 @@ export const stations: Station[] = [
     genre: ['AMBIENT + CHILL', 'JAZZ + EXOTICA'],
   },
   {
+    id: 'duke-ellington-radio',
+    name: 'Duke Ellington Radio',
+    description: 'All Duke Ellington All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/dukeellington/icecast.audio',
+    websiteUrl: 'https://www.dukeellington.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
+  },
+  {
+    id: 'george-benson-radio',
+    name: 'George Benson Radio',
+    description: 'All George Benson All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/georgebenson/icecast.audio',
+    websiteUrl: 'https://www.georgebenson.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
+  },
+  {
     id: 'groovy-reflections-radio',
     name: 'Groovy Reflections Radio',
     description: 'A world of Peace, Love and Grooviness',
     streamUrl: 'https://usa12.fastcast4u.com/proxy/reflecti?mp=/1',
     websiteUrl: 'https://www.groovyreflectionsradio.com/',
     genre: ['SOUL + FUNK', 'LEGENDS + ERAS'],
+  },
+  {
+    id: 'herbie-hancock-radio',
+    name: 'Herbie Hancock Radio',
+    description: 'All Herbie Hancock All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/herbiehancock/icecast.audio',
+    websiteUrl: 'https://www.herbiehancock.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
+  },
+  {
+    id: 'miles-davis-radio',
+    name: 'Miles Davis Radio',
+    description: 'All Miles Davis All The Time',
+    streamUrl: 'https://streaming.exclusive.radio/er/milesdavis/icecast.audio',
+    websiteUrl: 'https://www.milesdavis.com/',
+    genre: ['LEGENDS + ERAS', 'JAZZ + EXOTICA'],
   },
   {
     id: 'nts-memory-lane',
