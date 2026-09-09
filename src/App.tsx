@@ -42,7 +42,8 @@ const SOOMFON_GENRE_KEYS: Partial<Record<string, PadLabel>> = {
   '3': 'CLASSICAL',
   '4': 'DNB + RAVE',
   '5': 'DUB + REGGAE',
-  '6': 'ECLECTIC',
+  // '6' used to be ECLECTIC - now special-cased below to cycle NTS stations
+  // instead, same as '1' (favs) and '`' (shuffle) already are.
   '7': 'HIP HOP + RNB',
   '8': 'HOUSE + UKG',
   '9': 'JAZZ + EXOTICA',
@@ -179,6 +180,23 @@ function App() {
     engine.playStation(pool[Math.floor(Math.random() * pool.length)]);
   }, [engine, favourites]);
 
+  // The SOOMFON's former Eclectic key. Steps to the next NTS station,
+  // alphabetically, wrapping - same "always does exactly one thing" reasoning
+  // as the star key above. NTS isn't a Genre in the type system (no dedicated
+  // network field on Station either), so this matches by name prefix rather
+  // than going through playGenre/activeGenre at all.
+  const handleNtsCycle = useCallback(() => {
+    const ntsStations = stations
+      .filter((s) => /^NTS\s/i.test(s.name))
+      .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
+    if (ntsStations.length === 0) return;
+    engineRef.current.setActiveGenre(null);
+    setShuffleMode(false);
+    setFavsMode(false);
+    const idx = ntsStations.findIndex((s) => s.id === engine.currentStation?.id);
+    engine.playStation(ntsStations[(idx + 1) % ntsStations.length]);
+  }, [engine]);
+
   const handleShuffle = useCallback(() => {
     // If a genre pad is active, this button acts as ALL — clear genre only, keep FAVS intact
     if (engineRef.current.activeGenre) {
@@ -312,6 +330,8 @@ function App() {
   const handleShuffleRef = useRef(handleShuffle);
   const handleFavsCycleRef = useRef(handleFavsCycle);
   handleFavsCycleRef.current = handleFavsCycle;
+  const handleNtsCycleRef = useRef(handleNtsCycle);
+  handleNtsCycleRef.current = handleNtsCycle;
   const toggleDarkRef = useRef(toggleDark);
   handleFavsRef.current = handleFavsShuffle;
   handleShuffleRef.current = handleShuffle;
@@ -472,12 +492,13 @@ function App() {
         jumpToLetterRef.current(e.key.toLowerCase());
       } else if (
         !isIndexOpenRef.current && !e.metaKey && !e.ctrlKey && !e.altKey &&
-        (e.key === '1' || e.key === '`' || SOOMFON_GENRE_KEYS[e.key])
+        (e.key === '1' || e.key === '6' || e.key === '`' || SOOMFON_GENRE_KEYS[e.key])
       ) {
         // SOOMFON macro-deck shortcuts (see SOOMFON_GENRE_KEYS above).
         e.preventDefault();
         e.stopImmediatePropagation();
         if (e.key === '1') handleFavsCycleRef.current();
+        else if (e.key === '6') handleNtsCycleRef.current();
         else if (e.key === '`') handleShuffleRef.current();
         else playGenre(SOOMFON_GENRE_KEYS[e.key]!, favsRef.current);
       }
