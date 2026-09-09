@@ -52,6 +52,10 @@ const SOOMFON_GENRE_KEYS: Partial<Record<string, PadLabel>> = {
   '=': 'SOUL + FUNK',
 };
 
+// A few NTS shows excluded from the SOOMFON's NTS-cycle key by request
+// (spoken-word/ambient, not what that key is for).
+const NTS_CYCLE_EXCLUDE = new Set(['nts-field-recordings', 'nts-the-pit', 'nts-sheet-music']);
+
 const sortKey = (name: string) => {
   const stripped = name.replace(/^the\s+/i, '');
   return /^\d/.test(stripped) ? 'zzz_' + stripped.toLowerCase() : stripped.toLowerCase();
@@ -184,10 +188,11 @@ function App() {
   // alphabetically, wrapping - same "always does exactly one thing" reasoning
   // as the star key above. NTS isn't a Genre in the type system (no dedicated
   // network field on Station either), so this matches by name prefix rather
-  // than going through playGenre/activeGenre at all.
+  // than going through playGenre/activeGenre at all. A few NTS shows are
+  // excluded by request (spoken-word/ambient, not what this key is for).
   const handleNtsCycle = useCallback(() => {
     const ntsStations = stations
-      .filter((s) => /^NTS\s/i.test(s.name))
+      .filter((s) => /^NTS\s/i.test(s.name) && !NTS_CYCLE_EXCLUDE.has(s.id))
       .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
     if (ntsStations.length === 0) return;
     engineRef.current.setActiveGenre(null);
