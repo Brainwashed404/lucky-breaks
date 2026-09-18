@@ -549,6 +549,22 @@ function App() {
       'paused';
   }, [engine.status]);
 
+  // Publish real playback state via document.title, so something OUTSIDE the
+  // page can read it without any localhost fetch (Chrome blocks that for the
+  // installed PWA - see SOOMFON deck notes) or AppleScript (the PWA has no
+  // dictionary and JS execution is sandboxed to an isolated world anyway).
+  // A window's title IS readable from outside via the Accessibility API even
+  // while unfocused, which is what the deck's Play/Pause key icon uses
+  // (Hammerspoon polls this, a custom StreamDock plugin repaints the key) to
+  // show the TRUE state instead of blindly toggling every press - a plain
+  // press-counted toggle drifts out of sync the moment anything else changes
+  // playback (switching genre, the All button, NTS cycle, etc.), since none
+  // of those go through the Play/Pause key itself.
+  useEffect(() => {
+    const playing = engine.status === 'playing' || engine.status === 'loading';
+    document.title = playing ? 'Lucky Breaks — Playing' : 'Lucky Breaks — Paused';
+  }, [engine.status]);
+
   // Clear the bogus duration/progress bar that ICY streams inject.
   // Some streams report a Content-Length header the browser reads as duration
   // (e.g. 37 hours). Calling setPositionState() with no args removes it.
