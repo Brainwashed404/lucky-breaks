@@ -17,6 +17,16 @@
   min-height: 0;
 }
 
+/* iOS 26 draws its Liquid Glass status bar blur above the installed app's
+   web view, fading out roughly 45pt past the safe area, with no CSS or
+   meta opt-out. Push real content (the logo) below that ramp so the glass
+   only ever blurs flat background, not our text. Browser tabs are unaffected. */
+@media (display-mode: standalone) {
+  .mpcCenter {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 45px);
+  }
+}
+
 /* ── ROW 1: Logo bar ── */
 .logoBar {
   display: flex;
