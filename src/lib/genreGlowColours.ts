@@ -32,3 +32,8 @@ export const GENRE_GLOW_COLOURS = [
   '#2fbd77', // ROCK + INDIE: spring green
   '#d6409f', // SOUL + FUNK: magenta
 ] as const;
+
+// DRAMA + TALK's on-screen pad was replaced by the NTS cycle button (not a
+// genre, so it has no GENRE_GLOW_COLOURS slot of its own). Reuses DRAMA +
+// TALK's now-unused cyan rather than introducing an unverified new hue.
+export const NTS_GLOW_COLOUR = '#00b8d9';
