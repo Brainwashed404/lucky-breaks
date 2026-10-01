@@ -746,6 +746,8 @@ function App() {
             <VibePads
               activeGenre={engine.activeGenre}
               onPadClick={handlePadClick}
+              ntsActive={/^NTS\s/i.test(engine.currentStation?.name ?? '')}
+              onNtsClick={handleNtsCycle}
               midiConnected={midi.status === 'connected'}
               playbackStatus={engine.status}
             />

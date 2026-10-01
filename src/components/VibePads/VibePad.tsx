@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import type { CSSProperties } from 'react';
-import { type PadLabel } from '../../data/stations';
 import styles from './VibePads.module.css';
 
 export type PadGlowState = 'idle' | 'active' | 'loading' | 'error';
 
 interface VibePadProps {
-  label: PadLabel;
+  /** A PadLabel for genre pads, or any other display string for a special
+   *  non-genre pad (e.g. 'NTS'). Purely text here, lookups happen upstream. */
+  label: string;
   isActive: boolean;
   onClick: () => void;
   /** Colour + state of this pad's LED on the connected APC mini, or null when MIDI
