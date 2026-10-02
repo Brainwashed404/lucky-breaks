@@ -123,11 +123,39 @@ function App() {
     [],
   );
 
+  // Shuffle-without-repeats for whichever pad is selected (a genre, FAVS within
+  // a genre, or NTS). Keeps a queue per `key`; it is rebuilt when the key
+  // changes or runs out, and a rebuilt queue never opens with the station that
+  // just played, so a new loop never repeats it. Used by the pads themselves and
+  // by the keyboard/media FWD key so both walk the same order.
+  const shuffleQueueRef = useRef<{ key: string; ids: string[] }>({ key: '', ids: [] });
+  const ntsModeRef = useRef(false);
+  const nextShuffled = useCallback((key: string, pool: Station[]): Station | null => {
+    if (pool.length === 0) return null;
+    const q = shuffleQueueRef.current;
+    const inPool = new Set(pool.map((s) => s.id));
+    let ids = q.key === key ? q.ids.filter((id) => inPool.has(id)) : [];
+    if (ids.length === 0) {
+      ids = pool.map((s) => s.id);
+      for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+      }
+      if (ids.length > 1 && ids[0] === engineRef.current.currentStation?.id) {
+        [ids[0], ids[1]] = [ids[1], ids[0]];
+      }
+    }
+    const id = ids.shift()!;
+    shuffleQueueRef.current = { key, ids };
+    return pool.find((s) => s.id === id) ?? null;
+  }, []);
+
   // useFavs is passed explicitly rather than read from state so the APC's SHIFT
   // modifier can drop into a genre inside FAVS without a round trip through setState.
   const playGenre = useCallback((label: PadLabel, useFavs: boolean) => {
     const genre = PAD_GENRE_MAP[label];
     setShuffleMode(false);
+    ntsModeRef.current = false;
 
     if (useFavs) {
       // In FAVS mode: only play favourited stations within this genre
@@ -136,22 +164,23 @@ function App() {
         setScreenMessage('Fav a station in this genre');
         return;
       }
-      const candidates = allFavsInGenre.filter((s) => s.id !== engineRef.current.currentStation?.id);
-      const pool = candidates.length > 0 ? candidates : allFavsInGenre;
       setFavsMode(true);
       engineRef.current.setActiveGenre(genre);
-      engineRef.current.playStation(pool[Math.floor(Math.random() * pool.length)]);
+      const pick = nextShuffled(`fav:${genre}`, allFavsInGenre);
+      if (pick) engineRef.current.playStation(pick);
       return;
     }
 
     setFavsMode(false);
     engineRef.current.setActiveGenre(genre);
-    engineRef.current.playNext(genre);
-  }, []);
+    const pick = nextShuffled(`genre:${genre}`, stations.filter((s) => stationInGenre(s, genre)));
+    if (pick) engineRef.current.playStation(pick);
+  }, [nextShuffled]);
 
   const handlePadClick = (label: PadLabel) => playGenre(label, favsMode);
 
   const handleFavsShuffle = () => {
+    ntsModeRef.current = false;
     if (favsMode) { setFavsMode(false); setShuffleMode(false); return; }
     // Enter FAVS mode in shuffle — play a random fav immediately
     const favsList = stations.filter((s) => favourites.has(s.id));
@@ -174,6 +203,7 @@ function App() {
   // both). A key that always does exactly one thing - "random favourite" -
   // can't mislead.
   const handleFavsCycle = useCallback(() => {
+    ntsModeRef.current = false;
     const favsList = stations.filter((s) => favourites.has(s.id));
     if (favsList.length === 0) { setScreenMessage('Heart a station to build your FAVS'); return; }
     engineRef.current.setActiveGenre(null);
@@ -190,32 +220,19 @@ function App() {
   // network field on Station either), so this matches by name prefix rather
   // than going through playGenre/activeGenre at all. A few NTS shows are
   // excluded by request (spoken-word/ambient, not what this key is for).
-  const ntsQueueRef = useRef<Station[]>([]);
   const handleNtsCycle = useCallback(() => {
     const ntsStations = stations.filter((s) => /^NTS\s/i.test(s.name) && !NTS_CYCLE_EXCLUDE.has(s.id));
-    if (ntsStations.length === 0) return;
+    const pick = nextShuffled('nts', ntsStations);
+    if (!pick) return;
+    ntsModeRef.current = true;
     engineRef.current.setActiveGenre(null);
     setShuffleMode(false);
     setFavsMode(false);
-    // Shuffle-without-repeats: walk a shuffled queue of every NTS station, and
-    // only reshuffle once it is exhausted. Reshuffles never open with the
-    // station that just played, so the loop boundary never repeats it.
-    if (ntsQueueRef.current.length === 0) {
-      const order = [...ntsStations];
-      for (let i = order.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [order[i], order[j]] = [order[j], order[i]];
-      }
-      if (order.length > 1 && order[0].id === engine.currentStation?.id) {
-        [order[0], order[1]] = [order[1], order[0]];
-      }
-      ntsQueueRef.current = order;
-    }
-    const next = ntsQueueRef.current.shift()!;
-    engine.playStation(next);
-  }, [engine]);
+    engineRef.current.playStation(pick);
+  }, [nextShuffled]);
 
   const handleShuffle = useCallback(() => {
+    ntsModeRef.current = false;
     // If a genre pad is active, this button acts as ALL — clear genre only, keep FAVS intact
     if (engineRef.current.activeGenre) {
       engineRef.current.setActiveGenre(null);
@@ -246,17 +263,35 @@ function App() {
     setShuffleMode(next);
   }, []);
 
-  // Forward always steps to the next station in alphabetical order, never a
-  // random pick: "forward" should mean the one after this one, so NTS 1 goes to
-  // NTS 2. It therefore also drops out of shuffle, rather than continuing to
-  // jump around. Whatever genre and favs mode you're in is kept - the step just
-  // happens within that narrowed pool.
+  // Forward follows whatever pad is selected. With a genre pad (or the NTS pad)
+  // active it shuffles within that pool without repeats, exactly like pressing
+  // the pad again, so the keyboard/media FWD key never leaves the category.
+  // With no pad selected it steps alphabetically ("forward" = the one after
+  // this one), and drops out of shuffle. Favs mode is kept either way.
   const handleFwd = useCallback(() => {
     if (shuffleMode) setShuffleMode(false);
 
+    if (ntsModeRef.current && /^NTS\s/i.test(engine.currentStation?.name ?? '')) {
+      handleNtsCycle();
+      return;
+    }
+    ntsModeRef.current = false;
+
+    if (engine.activeGenre) {
+      const genre = engine.activeGenre;
+      let genrePool = stations.filter((s) => stationInGenre(s, genre));
+      if (favsMode) genrePool = genrePool.filter((s) => favourites.has(s.id));
+      if (genrePool.length === 0) {
+        if (favsMode) setScreenMessage('Fav a station in this genre');
+        return;
+      }
+      const pick = nextShuffled(`${favsMode ? 'fav' : 'genre'}:${genre}`, genrePool);
+      if (pick) engine.playStation(pick);
+      return;
+    }
+
     let pool = sortedStations;
     if (favsMode) pool = pool.filter((s) => favourites.has(s.id));
-    if (engine.activeGenre) pool = pool.filter((s) => stationInGenre(s, engine.activeGenre!));
 
     if (pool.length === 0) {
       if (favsMode) setScreenMessage('Fav a station in this genre');
@@ -266,9 +301,15 @@ function App() {
     // first entry, which is the sensible place to start from.
     const idx = pool.findIndex((s) => s.id === engine.currentStation?.id);
     engine.playStation(pool[(idx + 1) % pool.length]);
-  }, [engine, shuffleMode, sortedStations, favsMode, favourites]);
+  }, [engine, shuffleMode, sortedStations, favsMode, favourites, handleNtsCycle, nextShuffled]);
 
   const handleRwd = useCallback(() => {
+    // Shuffled pads (genre or NTS) go back through play history, since there is
+    // no alphabetical "previous" in a shuffled order.
+    if (engine.activeGenre || (ntsModeRef.current && /^NTS\s/i.test(engine.currentStation?.name ?? ''))) {
+      engine.playPrev();
+      return;
+    }
     if (favsMode) {
       const sortedFavs = [...stations]
         .filter((s) => favourites.has(s.id))
