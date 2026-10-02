@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAudioEngineContext } from './context/AudioContext';
-import { PAD_GENRE_MAP, PAD_LABELS, type PadLabel, stations, stationInGenre } from './data/stations';
+import { PAD_GENRE_MAP, PAD_LABELS, type PadLabel, type Station, stations, stationInGenre } from './data/stations';
 import { DisplayScreen } from './components/DisplayScreen/DisplayScreen';
 import { GravityVisualiser } from './components/GravityVisualiser/GravityVisualiser';
 import { TransportControls } from './components/TransportControls/TransportControls';
@@ -190,16 +190,29 @@ function App() {
   // network field on Station either), so this matches by name prefix rather
   // than going through playGenre/activeGenre at all. A few NTS shows are
   // excluded by request (spoken-word/ambient, not what this key is for).
+  const ntsQueueRef = useRef<Station[]>([]);
   const handleNtsCycle = useCallback(() => {
-    const ntsStations = stations
-      .filter((s) => /^NTS\s/i.test(s.name) && !NTS_CYCLE_EXCLUDE.has(s.id))
-      .sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
+    const ntsStations = stations.filter((s) => /^NTS\s/i.test(s.name) && !NTS_CYCLE_EXCLUDE.has(s.id));
     if (ntsStations.length === 0) return;
     engineRef.current.setActiveGenre(null);
     setShuffleMode(false);
     setFavsMode(false);
-    const idx = ntsStations.findIndex((s) => s.id === engine.currentStation?.id);
-    engine.playStation(ntsStations[(idx + 1) % ntsStations.length]);
+    // Shuffle-without-repeats: walk a shuffled queue of every NTS station, and
+    // only reshuffle once it is exhausted. Reshuffles never open with the
+    // station that just played, so the loop boundary never repeats it.
+    if (ntsQueueRef.current.length === 0) {
+      const order = [...ntsStations];
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      if (order.length > 1 && order[0].id === engine.currentStation?.id) {
+        [order[0], order[1]] = [order[1], order[0]];
+      }
+      ntsQueueRef.current = order;
+    }
+    const next = ntsQueueRef.current.shift()!;
+    engine.playStation(next);
   }, [engine]);
 
   const handleShuffle = useCallback(() => {
