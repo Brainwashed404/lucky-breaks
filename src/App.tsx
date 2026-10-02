@@ -258,19 +258,19 @@ function App() {
           return;
         }
       }
-      engineRef.current.shuffle();
+      const pick = nextShuffled('all', stations);
+      if (pick) engineRef.current.playStation(pick);
+      else engineRef.current.shuffle();
     }
     setShuffleMode(next);
-  }, []);
+  }, [nextShuffled]);
 
   // Forward follows whatever pad is selected. With a genre pad (or the NTS pad)
   // active it shuffles within that pool without repeats, exactly like pressing
   // the pad again, so the keyboard/media FWD key never leaves the category.
   // With no pad selected it steps alphabetically ("forward" = the one after
-  // this one), and drops out of shuffle. Favs mode is kept either way.
+  // this one) - only when no pad and no SHUFFLE is engaged. Favs mode is kept.
   const handleFwd = useCallback(() => {
-    if (shuffleMode) setShuffleMode(false);
-
     if (ntsModeRef.current && /^NTS\s/i.test(engine.currentStation?.name ?? '')) {
       handleNtsCycle();
       return;
@@ -278,6 +278,7 @@ function App() {
     ntsModeRef.current = false;
 
     if (engine.activeGenre) {
+      setShuffleMode(false);
       const genre = engine.activeGenre;
       let genrePool = stations.filter((s) => stationInGenre(s, genre));
       if (favsMode) genrePool = genrePool.filter((s) => favourites.has(s.id));
@@ -295,6 +296,14 @@ function App() {
 
     if (pool.length === 0) {
       if (favsMode) setScreenMessage('Fav a station in this genre');
+      return;
+    }
+
+    // SHUFFLE engaged (no pad): forward is the same no-repeat shuffle as the
+    // SHUFFLE button, over everything (or just favs), and stays in shuffle.
+    if (shuffleMode) {
+      const pick = nextShuffled(favsMode ? 'fav:all' : 'all', pool);
+      if (pick) engine.playStation(pick);
       return;
     }
     // findIndex returning -1 (current station not in this pool) lands on the
